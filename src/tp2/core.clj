@@ -1,6 +1,5 @@
 (ns tp2.core)
 
-(defn foo
+(defn -main [& args]
   "Punto de entrada del programa."
-  [x]
-  (println x "Hello, World!"))
+  (println "Hello, World!"))

@@ -12,7 +12,9 @@ Luca Fogola - 113117 - lfogola@fi.uba.ar
 Aplicación de procesamiento de imágenes basada en filtros compuestos.  
 
 # Instrucciones para ejecucion  
-Se debe poder ejecutar el programa con `lein run`. Deben estar las indicaciones elementales en el README.  
+Para correr el programa:
+- Colocarse en `tp2-2026c1-tp1-cambiar-nombre-despues`  
+- Correr el programa con `lein run`.  
 
 ## License  
 
