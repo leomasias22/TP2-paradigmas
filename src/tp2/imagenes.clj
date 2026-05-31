@@ -35,8 +35,8 @@
 
 (defn obtener-pixel [matriz-pixeles x y]
   ; Dada una matriz de pixeles y unas coordenadas, devuelve un pixel.
-  ; En el caso de que esté fuera de los límites, devuelve un pixel RGBA #00000000.
-  (get (get matriz-pixeles x []) y (desempaquetar-pixel 0x00000000)))
+  ; En el caso de que esté fuera de los límites, devuelve nil.
+  (get (get matriz-pixeles x []) y nil))
 
 (defn obtener-pixeles [imagen]
   ; Dada una imagen, devuelve sus pixeles en una matriz de pixeles [que son mapas RGBA].

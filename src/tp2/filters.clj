@@ -21,12 +21,13 @@
 
 (defn avg-kernel [subvector-pixeles]
   ; Dada una submatriz de pixeles, calcula el pixel promedio.
-  (let [canales [:a :r :g :b]]
-    ; Crear un mapa de formato adecuado [canales : sumas/9]
+  (let [canales [:a :r :g :b]
+        pixeles-validos (filter some? subvector-pixeles)
+        n (max 1 (count pixeles-validos))]
+    ; Crear un mapa de formato adecuado [canales : sumas/n]
     (zipmap canales
             (for [canal canales]
-              (quot (reduce + (map canal subvector-pixeles)) 9)))
-    ; Es como hacer "(map #(quot (reduce + (map % subvector-pixeles)) 9) canales)".
+              (quot (reduce + (map canal pixeles-validos)) n)))
     ))
 
 (defn difuminado-pixel [matriz-pixeles x y]
