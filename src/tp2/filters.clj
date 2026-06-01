@@ -3,6 +3,8 @@
 
 ; "Funciones puras de procesamiento de imagen."
 
+; BRILLO
+
 (defn brillo-pixel [pixel factor-brillo]
   ; Dado un pixel [un map de 4 campos], devuelve un pixel con brillo aumentado.
   {:a (get pixel :a)
@@ -11,13 +13,15 @@
    :b (img/clamp (* (get pixel :b) factor-brillo))
    })
 
-(defn brillo [matriz-pixeles]
-  ; Aumenta el brillo de la imagen, multiplicando una constante pixel por pixel.
+(defn brillo [matriz-pixeles inicio fin]
+  ; Aumenta el brillo de la matriz de pixeles en su rango indicado, multiplicando una constante pixel por pixel.
   (let [factor-brillo 1.1]
     (mapv (fn [fila-pixeles]
             (mapv (fn [pixel] (brillo-pixel pixel factor-brillo)) fila-pixeles))
-          matriz-pixeles)
+          (subvec matriz-pixeles inicio fin))
     ))
+
+; DIFUMINADO
 
 (defn avg-kernel [subvector-pixeles]
   ; Dada una submatriz de pixeles, calcula el pixel promedio.
@@ -39,16 +43,17 @@
     (avg-kernel subvector-pixeles)
   ))
 
-(defn difuminado [matriz-pixeles]
-  ; Difumina la imagen, reduciendo detalles finos y el ruido local.
+(defn difuminado [matriz-pixeles inicio fin]
+  ; Difumina la matriz de pixeles en el rango indicado, reduciendo detalles finos y el ruido local.
   ; Este filtro usa un kernel de suavizado de caja 3x3.
-  (let [alto (count matriz-pixeles)
-        ancho (count (first matriz-pixeles))]
-    (vec (for [y (range alto)]
+  (let [ancho (count (first matriz-pixeles))]
+    (vec (for [y (range inicio fin)]
            (vec (for [x (range ancho)]
                   (difuminado-pixel matriz-pixeles x y)))
            ))
     ))
+
+; INVERTIR
 
 (defn invertir-pixel [pixel]
   ; Dado un pixel [un map de 4 campos], devuelve un pixel con campos RGBA invertidos.
@@ -58,9 +63,9 @@
    :b (- 255 (get pixel :b))
    })
 
-(defn invertir [matriz-pixeles]
-  ; Invierte los colores de la imagen, modificando el RGB pixel por pixel
+(defn invertir [matriz-pixeles inicio fin]
+  ; "Invierte los colores de la matriz de pixeles en el rango indicado, modificando valores RGB pixel por pixel".
   (mapv (fn [fila-pixeles]
           (mapv (fn [pixel] (invertir-pixel pixel)) fila-pixeles))
-        matriz-pixeles)
+        (subvec matriz-pixeles inicio fin))
   )
