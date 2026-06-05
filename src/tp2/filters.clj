@@ -38,7 +38,7 @@
   ; Dada una matriz de pixeles y coordenadas de un pixel, calcula un subvector de pixeles,
   ; luego delega al kernel la tarea de promedio de pixel, y devuelve su resultado.
   (let [subvector-pixeles (for [ady-x [-1 0 1] ady-y [-1 0 1]]
-                            (img/obtener-pixel matriz-pixeles (+ x ady-x) (+ y ady-y))
+                            (img/obtener-pixel matriz-pixeles (+ y ady-y) (+ x ady-x))
                             )]
     (avg-kernel subvector-pixeles)
   ))

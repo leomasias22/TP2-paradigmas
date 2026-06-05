@@ -4,16 +4,15 @@
            [javax.swing JPanel JButton BoxLayout BorderFactory Box SwingUtilities]
            [java.awt Dimension Color]))
 
-;; Botones parte superior
 (def config-top
   [{:texto "Desaturar" :accion :desaturar}
    {:texto "Difuminado" :accion :difuminar}
    {:texto "Invertir" :accion :invertir}])
 
-;; Botones parte inferior
 (def config-bottom
   [{:texto "Agregar" :accion :agregar}
    {:texto "Aplicar" :accion :aplicar}
+   {:texto "Deshacer" :accion :deshacer}
    {:texto "Reset" :accion :resetear}])
 
 (defn crear []
@@ -22,8 +21,10 @@
         borde-vacio (BorderFactory/createEmptyBorder 20 20 20 20)
         color-fondo (Color. 230 230 230)
         color-boton (Color. 180 180 180)
-        color-activo (Color. 210 210 210)
+        color-activo (Color. 100 200 100)
         color-deshabilitado (Color. 130 130 130)
+        color-rojo (Color. 255 100 100)
+        ;; Registro para guardar instancias de botones
         botones-estado (atom {})
         crear-btn (fn [{:keys [texto accion]}]
                     (let [btn (JButton. texto)]
@@ -37,7 +38,6 @@
                       (swap! botones-estado assoc accion btn)
                       btn))]
 
-    ;; Barra menu de la derecha(Mismas especificaciones que el de la izquierda)
     (.setLayout panel (BoxLayout. panel BoxLayout/Y_AXIS))
     (.setPreferredSize panel (Dimension. 200 900))
     (.setBackground panel color-fondo)
@@ -46,24 +46,36 @@
     (doseq [cfg config-top]
       (.add panel (crear-btn cfg)))
 
+    ;; Empuja los botones inferiores al fondo del panel
     (.add panel (Box/createVerticalGlue))
 
     (doseq [cfg config-bottom]
       (.add panel (crear-btn cfg)))
 
-    ;; Aplicacion de los estados en la interfaz
+    ;; Sincroniza los botones de UI con el estado logico de los filtros
     (add-watch evt/estado :actualizador-botones
                (fn [_ _ _ nuevo-estado]
                  (SwingUtilities/invokeLater
                    (fn []
                      (let [seleccionado (:filtro-seleccionado nuevo-estado)
+                           pipeline (:pipeline nuevo-estado)
+                           aplicados (:filtros-aplicados nuevo-estado)
                            hay-imagen? (some? (:imagen nuevo-estado))]
                        (doseq [[accion btn] @botones-estado]
-                         (.setEnabled btn hay-imagen?)
-                         (if hay-imagen?
-                           (if (= seleccionado accion)
-                             (.setBackground btn color-activo)
-                             (.setBackground btn color-boton))
-                           (.setBackground btn color-deshabilitado))))))))
+                         (if (= accion :desaturar);despues modificar cuando se implemente desaturar.
+                           (do
+                             (.setEnabled btn false)
+                             (.setBackground btn color-rojo))
+                           (let [habilitado (if (= accion :deshacer)
+                                              (boolean (and hay-imagen? seleccionado (get aplicados seleccionado)))
+                                              hay-imagen?)]
+                             (.setEnabled btn habilitado)
+                             (if habilitado
+                               (if (or (= seleccionado accion)
+                                       (some #{accion} pipeline)
+                                       (get aplicados accion))
+                                 (.setBackground btn color-activo)
+                                 (.setBackground btn color-boton))
+                               (.setBackground btn color-deshabilitado))))))))))
 
     panel))
