@@ -59,8 +59,3 @@
                        (.setCursor frame (Cursor/getDefaultCursor)))))))
 
     (.setVisible frame true)))
-
-(defn -main [& args]
-  (SwingUtilities/invokeLater
-    (fn []
-      (crear-interfaz))))
