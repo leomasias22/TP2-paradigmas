@@ -7,11 +7,12 @@
 
 (defn brillo-pixel [pixel factor-brillo]
   ; Dado un pixel [un map de 4 campos], devuelve un pixel con brillo aumentado.
-  {:a (get pixel :a)
-   :r (img/clamp (* (get pixel :r) factor-brillo))
-   :g (img/clamp (* (get pixel :g) factor-brillo))
-   :b (img/clamp (* (get pixel :b) factor-brillo))
-   })
+  (let [{:keys [a r g b]} pixel]
+    {:a a
+     :r (img/clamp (int (* r factor-brillo)))
+     :g (img/clamp (int (* g factor-brillo)))
+     :b (img/clamp (int (* b factor-brillo)))}
+    ))
 
 (defn brillo [matriz-pixeles inicio fin]
   ; Aumenta el brillo de la matriz de pixeles en su rango indicado, multiplicando una constante pixel por pixel.
@@ -38,7 +39,7 @@
   ; Dada una matriz de pixeles y coordenadas de un pixel, calcula un subvector de pixeles,
   ; luego delega al kernel la tarea de promedio de pixel, y devuelve su resultado.
   (let [subvector-pixeles (for [ady-x [-1 0 1] ady-y [-1 0 1]]
-                            (img/obtener-pixel matriz-pixeles (+ y ady-y) (+ x ady-x))
+                            (img/obtener-pixel matriz-pixeles (+ x ady-x) (+ y ady-y))
                             )]
     (avg-kernel subvector-pixeles)
   ))

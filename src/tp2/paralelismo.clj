@@ -20,7 +20,7 @@
   (let [submatrices (pmap (fn [[inicio fin]]
                             (filtro matriz-pixeles inicio fin))
                           rangos)]
-    (vec (apply concat submatrices))
+    (reduce into [] submatrices)
     ))
 
 (defn aplicar-pipeline [pipeline imagen-actual]
