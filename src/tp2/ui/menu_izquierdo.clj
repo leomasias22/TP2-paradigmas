@@ -1,9 +1,9 @@
 (ns tp2.ui.menu-izquierdo
-  (:require [tp2.menu-eventos :as evt])
+  (:require [tp2.eventos.acciones :as evt])
   (:import [javax.swing JPanel JButton BoxLayout BorderFactory]
            [java.awt Dimension Color]))
 
-;; Configuracion base de acciones del panel izquierdo
+;; Configuracion de las acciones disponibles en el panel lateral izquierdo
 (def config-botones
   [{:texto "Abrir" :accion :abrir}
    {:texto "Guardar" :accion :guardar}
@@ -17,13 +17,12 @@
         color-fondo (Color. 230 230 230)
         color-boton (Color. 180 180 180)]
 
-    ;; Definicion del diseno visual del contenedor
     (.setLayout panel (BoxLayout. panel BoxLayout/Y_AXIS))
     (.setPreferredSize panel (Dimension. 200 900))
     (.setBackground panel color-fondo)
     (.setBorder panel (BorderFactory/createCompoundBorder borde-linea borde-vacio))
 
-    ;; Generacion e insercion dinamica de botones
+    ;; Genera los botones dinamicamente y les asigna su evento correspondiente
     (doseq [{:keys [texto accion]} config-botones]
       (let [btn (JButton. texto)]
         (.setMaximumSize btn (Dimension. Integer/MAX_VALUE (.height (.getPreferredSize btn))))

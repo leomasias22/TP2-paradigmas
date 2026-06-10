@@ -2,7 +2,9 @@
   (:gen-class)
   (:require [tp2.ui.menu-izquierdo :as izq]
             [tp2.ui.menu-derecho :as der]
-            [tp2.menu-eventos :as evt])
+            [tp2.eventos.estado :as est]
+            [tp2.eventos.archivos]
+            [tp2.eventos.filtros])
   (:import [javax.swing JFrame JPanel SwingUtilities JLabel ImageIcon JScrollPane]
            [java.awt BorderLayout Color Cursor]))
 
@@ -18,8 +20,7 @@
 
     (.add panel scroll-pane BorderLayout/CENTER)
 
-    ;; Escucha cambios en el estado para actualizar la vista en el hilo de Swing
-    (add-watch evt/estado :actualizador-vista
+    (add-watch est/estado :actualizador-vista
                (fn [_ _ _ nuevo-estado]
                  (SwingUtilities/invokeLater
                    (fn []
@@ -49,8 +50,7 @@
     (.setDefaultCloseOperation frame JFrame/EXIT_ON_CLOSE)
     (.setLocationRelativeTo frame nil)
 
-    ;; Controla el cursor de carga basandose en el estado de procesamiento
-    (add-watch evt/estado :actualizador-cursor
+    (add-watch est/estado :actualizador-cursor
                (fn [_ _ _ nuevo-estado]
                  (SwingUtilities/invokeLater
                    (fn []
@@ -60,7 +60,7 @@
 
     (.setVisible frame true)))
 
-(defn -main [& args];Para no volvernos locos deployando dejo esto aca, despues borrar.
+(defn -main [& args]
   (SwingUtilities/invokeLater
     (fn []
       (crear-interfaz))))

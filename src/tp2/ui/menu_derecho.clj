@@ -1,11 +1,12 @@
 (ns tp2.ui.menu-derecho
-  (:require [tp2.menu-eventos :as evt])
-  (:import (java.awt.event ActionListener)
-           [javax.swing JPanel JButton BoxLayout BorderFactory Box SwingUtilities]
-           [java.awt Dimension Color]))
-
+  (:require [tp2.eventos.acciones :as evt]
+            [tp2.eventos.estado :as est])
+  (:import (java.awt Color Dimension)
+           (java.awt.event ActionListener)
+           (javax.swing BorderFactory Box BoxLayout JButton JPanel SwingUtilities)))
+;; Configuracion de las acciones disponibles en el panel lateral derecho.
 (def config-top
-  [{:texto "Desaturar" :accion :desaturar}
+  [{:texto "Brillo" :accion :brillo}
    {:texto "Difuminado" :accion :difuminar}
    {:texto "Invertir" :accion :invertir}])
 
@@ -23,8 +24,8 @@
         color-boton (Color. 180 180 180)
         color-activo (Color. 100 200 100)
         color-deshabilitado (Color. 130 130 130)
-        color-rojo (Color. 255 100 100)
-        ;; Registro para guardar instancias de botones
+        _ (Color. 255 100 100)
+        ;; Registro local para guardar instancias de botones y poder modificarlos
         botones-estado (atom {})
         crear-btn (fn [{:keys [texto accion]}]
                     (let [btn (JButton. texto)]
@@ -32,7 +33,7 @@
                       (.setBackground btn color-deshabilitado)
                       (.setEnabled btn false)
                       (.addActionListener btn
-                                          (reify java.awt.event.ActionListener
+                                          (reify ActionListener
                                             (actionPerformed [_ _]
                                               (evt/manejar-accion accion))))
                       (swap! botones-estado assoc accion btn)
@@ -46,14 +47,12 @@
     (doseq [cfg config-top]
       (.add panel (crear-btn cfg)))
 
-    ;; Empuja los botones inferiores al fondo del panel
     (.add panel (Box/createVerticalGlue))
-
     (doseq [cfg config-bottom]
       (.add panel (crear-btn cfg)))
 
-    ;; Sincroniza los botones de UI con el estado logico de los filtros
-    (add-watch evt/estado :actualizador-botones
+    ;; Sincroniza la apariencia y estado de los botones con la seleccion de filtros
+    (add-watch est/estado :actualizador-botones
                (fn [_ _ _ nuevo-estado]
                  (SwingUtilities/invokeLater
                    (fn []
@@ -62,20 +61,19 @@
                            aplicados (:filtros-aplicados nuevo-estado)
                            hay-imagen? (some? (:imagen nuevo-estado))]
                        (doseq [[accion btn] @botones-estado]
-                         (if (= accion :desaturar);despues modificar cuando se implemente desaturar.
-                           (do
-                             (.setEnabled btn false)
-                             (.setBackground btn color-rojo))
-                           (let [habilitado (if (= accion :deshacer)
-                                              (boolean (and hay-imagen? seleccionado (get aplicados seleccionado)))
-                                              hay-imagen?)]
+
+                           (let [habilitado (cond
+                                              (= accion :deshacer) (boolean (and hay-imagen? seleccionado (or (some #{seleccionado} pipeline) (some #{seleccionado} aplicados))))
+                                              (= accion :agregar) (boolean (and hay-imagen? seleccionado))
+                                              (= accion :aplicar) (boolean (and hay-imagen? (seq pipeline)))
+                                              :else hay-imagen?)]
                              (.setEnabled btn habilitado)
                              (if habilitado
                                (if (or (= seleccionado accion)
                                        (some #{accion} pipeline)
-                                       (get aplicados accion))
+                                       (some #{accion} aplicados))
                                  (.setBackground btn color-activo)
                                  (.setBackground btn color-boton))
-                               (.setBackground btn color-deshabilitado))))))))))
+                               (.setBackground btn color-deshabilitado)))))))))
 
     panel))
