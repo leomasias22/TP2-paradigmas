@@ -30,13 +30,20 @@
              :filtro-seleccionado nil))))
 
 ;; Quita unicamente la ultima instancia del filtro seleccionado de la secuencia
-(defn quitar-filtro [pipeline filtro]
+(defn quitar-ultimo-filtro [pipeline filtro]
   (let [v-pipe (vec pipeline)
         idx (.lastIndexOf v-pipe filtro)]
     (if (>= idx 0)
       (let [[antes despues] (split-at idx v-pipe)]
         (vec (concat antes (rest despues))))
       pipeline)))
+
+(defn quitar-filtro [idx pipeline]
+  ; Dado un indice de filtro, devuelve un pipeline que lo haya removido.
+  ; Esta funcion no revisa si se envia un indice fuera de rango; asume que es correcto.
+  (vec (concat (subvec pipeline 0 idx)
+               (subvec pipeline (inc idx)))
+       ))
 
 ;; Recalcula la imagen pasando todos los filtros aplicados
 (defn re-aplicar-filtros [imagen-original filtros-aplicados]
@@ -63,12 +70,12 @@
       (if (some #{filtro-seleccionado} pipeline)
         (swap! estado (fn [st]
                         (-> st
-                            (update :pipeline quitar-filtro filtro-seleccionado)
+                            (update :pipeline quitar-ultimo-filtro filtro-seleccionado)
                             (assoc :filtro-seleccionado nil))))
         (when (some #{filtro-seleccionado} filtros-aplicados)
           (swap! estado assoc :procesando? true)
           (future
-            (let [nuevos-aplicados (quitar-filtro filtros-aplicados filtro-seleccionado)
+            (let [nuevos-aplicados (quitar-ultimo-filtro filtros-aplicados filtro-seleccionado)
                   nueva-img (re-aplicar-filtros imagen-original nuevos-aplicados)]
               (swap! estado assoc
                      :filtros-aplicados nuevos-aplicados
