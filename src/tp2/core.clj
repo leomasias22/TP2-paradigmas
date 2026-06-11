@@ -3,7 +3,4 @@
   (:require [tp2.app :as app])
   (:import [javax.swing SwingUtilities]))
 
-(defn -main [& args]
-  (SwingUtilities/invokeLater
-    (fn []
-      (app/crear-interfaz))))
+(defn -main [& args] (app/inicializar))

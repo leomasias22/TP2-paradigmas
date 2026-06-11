@@ -10,7 +10,7 @@
    {:texto "Guardar como" :accion :guardar-como}
    {:texto "Salir" :accion :salir}])
 
-(defn crear []
+(defn crear [estado]
   (let [panel (JPanel.)
         borde-linea (BorderFactory/createMatteBorder 0 0 0 1 Color/GRAY)
         borde-vacio (BorderFactory/createEmptyBorder 20 20 20 20)
@@ -30,7 +30,7 @@
         (.addActionListener btn
                             (reify java.awt.event.ActionListener
                               (actionPerformed [_ _]
-                                (evt/manejar-accion accion))))
+                                (evt/manejar-accion accion estado))))
         (.add panel btn)))
 
     panel))

@@ -1,6 +1,5 @@
 (ns tp2.ui.menu-derecho
-  (:require [tp2.eventos.acciones :as evt]
-            [tp2.eventos.estado :as est])
+  (:require [tp2.eventos.acciones :as evt])
   (:import (java.awt Color Dimension)
            (java.awt.event ActionListener)
            (javax.swing BorderFactory Box BoxLayout JButton JPanel SwingUtilities)))
@@ -16,7 +15,7 @@
    {:texto "Deshacer" :accion :deshacer}
    {:texto "Reset" :accion :resetear}])
 
-(defn crear []
+(defn crear [estado]
   (let [panel (JPanel.)
         borde-linea (BorderFactory/createMatteBorder 0 1 0 0 Color/GRAY)
         borde-vacio (BorderFactory/createEmptyBorder 20 20 20 20)
@@ -35,7 +34,7 @@
                       (.addActionListener btn
                                           (reify ActionListener
                                             (actionPerformed [_ _]
-                                              (evt/manejar-accion accion))))
+                                              (evt/manejar-accion accion estado))))
                       (swap! botones-estado assoc accion btn)
                       btn))]
 
@@ -52,7 +51,7 @@
       (.add panel (crear-btn cfg)))
 
     ;; Sincroniza la apariencia y estado de los botones con la seleccion de filtros
-    (add-watch est/estado :actualizador-botones
+    (add-watch estado :actualizador-botones
                (fn [_ _ _ nuevo-estado]
                  (SwingUtilities/invokeLater
                    (fn []

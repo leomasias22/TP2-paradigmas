@@ -2,13 +2,12 @@
   (:gen-class)
   (:require [tp2.ui.menu-izquierdo :as izq]
             [tp2.ui.menu-derecho :as der]
-            [tp2.eventos.estado :as est]
             [tp2.eventos.archivos]
             [tp2.eventos.filtros])
   (:import [javax.swing JFrame JPanel SwingUtilities JLabel ImageIcon JScrollPane]
            [java.awt BorderLayout Color Cursor]))
 
-(defn crear-panel-central []
+(defn crear-panel-central [estado]
   (let [panel (JPanel. (BorderLayout.))
         label-imagen (JLabel. "")
         scroll-pane (JScrollPane. label-imagen)
@@ -20,7 +19,7 @@
 
     (.add panel scroll-pane BorderLayout/CENTER)
 
-    (add-watch est/estado :actualizador-vista
+    (add-watch estado :actualizador-vista
                (fn [_ _ _ nuevo-estado]
                  (SwingUtilities/invokeLater
                    (fn []
@@ -35,11 +34,11 @@
                          (.repaint label-imagen)))))))
     panel))
 
-(defn crear-interfaz []
+(defn crear-interfaz [estado]
   (let [frame (JFrame. "Interfaz")
-        panel-izquierdo (izq/crear)
-        panel-derecho (der/crear)
-        panel-central (crear-panel-central)]
+        panel-izquierdo (izq/crear estado)
+        panel-derecho (der/crear estado)
+        panel-central (crear-panel-central estado)]
 
     (.setLayout frame (BorderLayout.))
     (.add frame panel-izquierdo BorderLayout/WEST)
@@ -50,7 +49,7 @@
     (.setDefaultCloseOperation frame JFrame/EXIT_ON_CLOSE)
     (.setLocationRelativeTo frame nil)
 
-    (add-watch est/estado :actualizador-cursor
+    (add-watch estado :actualizador-cursor
                (fn [_ _ _ nuevo-estado]
                  (SwingUtilities/invokeLater
                    (fn []
@@ -59,3 +58,16 @@
                        (.setCursor frame (Cursor/getDefaultCursor)))))))
 
     (.setVisible frame true)))
+
+(defn inicializar []
+  (let [estado (atom {:ruta nil
+                      :imagen nil
+                      :imagen-original nil
+                      :filtro-seleccionado nil
+                      :pipeline []
+                      :filtros-aplicados []
+                      :procesando? false})]
+    (SwingUtilities/invokeLater
+      (fn []
+        (crear-interfaz estado)))
+    ))

@@ -6,5 +6,5 @@
 (defmethod manejar-accion :default [accion & args]
   (println "Accion no implementada:" accion))
 
-(defmethod manejar-accion :salir [_]
+(defmethod manejar-accion :salir [_ & _]
   (System/exit 0))

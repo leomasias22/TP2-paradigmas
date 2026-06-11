@@ -1,27 +1,26 @@
 (ns tp2.eventos.filtros
-  (:require [tp2.eventos.estado :refer [estado]]
-            [tp2.eventos.acciones :refer [manejar-accion]]
+  (:require [tp2.eventos.acciones :refer [manejar-accion]]
             [tp2.imagenes :as img]
             [tp2.paralelismo :as par]
             [tp2.filters :as flt])
   (:import [java.awt.image BufferedImage]))
 
 ;; Registra el filtro elegido temporalmente antes de enviarlo al pipeline
-(defn seleccionar-filtro [filtro]
+(defn seleccionar-filtro [estado filtro]
   (when (:imagen @estado)
     (swap! estado assoc :filtro-seleccionado filtro)))
 
-(defmethod manejar-accion :brillo [_] (seleccionar-filtro :brillo))
-(defmethod manejar-accion :difuminar [_] (seleccionar-filtro :difuminar))
-(defmethod manejar-accion :invertir [_] (seleccionar-filtro :invertir))
+(defmethod manejar-accion :brillo [_ estado] (seleccionar-filtro estado :brillo))
+(defmethod manejar-accion :difuminar [_ estado] (seleccionar-filtro estado :difuminar))
+(defmethod manejar-accion :invertir [_ estado] (seleccionar-filtro estado :invertir))
 ;; Inserta el filtro seleccionado al final de la secuencia del pipeline
-(defmethod manejar-accion :agregar [_]
+(defmethod manejar-accion :agregar [_ estado]
   (let [{:keys [filtro-seleccionado]} @estado]
     (when filtro-seleccionado
       (swap! estado update :pipeline conj filtro-seleccionado))))
 
 ;; Limpia toda la secuencia y devuelve la imagen a su estado original
-(defmethod manejar-accion :resetear [_]
+(defmethod manejar-accion :resetear [_ estado]
   (let [{:keys [imagen-original]} @estado]
     (when imagen-original
       (swap! estado assoc
@@ -58,7 +57,7 @@
       nueva-img)))
 
 ;; Deshace un filtro individual quitandolo del pipeline pendiente o de los aplicados
-(defmethod manejar-accion :deshacer [_]
+(defmethod manejar-accion :deshacer [_ estado]
   (let [{:keys [filtro-seleccionado pipeline filtros-aplicados imagen-original]} @estado]
     (when filtro-seleccionado
       (if (some #{filtro-seleccionado} pipeline)
@@ -78,7 +77,7 @@
                      :procesando? false))))))))
 
 ;; Aplica la secuencia completa de filtros sobre la imagen original
-(defmethod manejar-accion :aplicar [_]
+(defmethod manejar-accion :aplicar [_ estado]
   (let [{:keys [imagen-original pipeline filtros-aplicados]} @estado]
     (when (and imagen-original (seq pipeline))
       (swap! estado assoc :procesando? true)

@@ -1,13 +1,12 @@
 (ns tp2.eventos.archivos
-  (:require [tp2.eventos.estado :refer [estado]]
-            [tp2.eventos.acciones :refer [manejar-accion]])
+  (:require [tp2.eventos.acciones :refer [manejar-accion]])
   (:import [javax.imageio ImageIO]
            [java.io File]
            [java.awt FileDialog Frame]
            [java.awt.image BufferedImage]))
 
 ;; Carga la imagen desde el disco y reinicia el estado de los filtros
-(defmethod manejar-accion :cargar [_ ruta]
+(defmethod manejar-accion :cargar [_ estado ruta]
   (try
     (let [img (ImageIO/read (File. ruta))]
       (reset! estado {:ruta ruta
@@ -21,14 +20,14 @@
       (println "Error:" (.getMessage e)))))
 
 ;; Abre un cuadro de dialogo nativo para elegir el archivo
-(defmethod manejar-accion :abrir [_]
+(defmethod manejar-accion :abrir [_ estado]
   (let [dialogo (FileDialog. (Frame.) "Seleccionar Imagen" FileDialog/LOAD)]
     (.setFile dialogo "*.png;*.jpg;*.jpeg")
     (.setVisible dialogo true)
     (let [directorio (.getDirectory dialogo)
           archivo (.getFile dialogo)]
       (when (and directorio archivo)
-        (manejar-accion :cargar (str directorio archivo))))))
+        (manejar-accion :cargar estado (str directorio archivo))))))
 
 ;; Transforma imagenes con transparencia a RGB solido si se guardan como JPG para evitar errores
 (defn guardar-archivo [imagen ruta]
@@ -53,7 +52,7 @@
     ruta-final))
 
 ;; Guarda la imagen sobreescribiendo el archivo actual
-(defmethod manejar-accion :guardar [_]
+(defmethod manejar-accion :guardar [_ estado]
   (let [{:keys [ruta imagen]} @estado]
     (when (and ruta imagen)
       (try
@@ -64,7 +63,7 @@
           (println "Error:" (.getMessage e)))))))
 
 ;; Abre un cuadro de dialogo para elegir el directorio y nombre del nuevo archivo
-(defmethod manejar-accion :guardar-como [_]
+(defmethod manejar-accion :guardar-como [_ estado]
   (let [{:keys [imagen]} @estado]
     (when imagen
       (let [dialogo (FileDialog. (Frame.) "Guardar Imagen Como" FileDialog/SAVE)]
