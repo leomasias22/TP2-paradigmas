@@ -1,6 +1,7 @@
 (ns tp2.ui.menu-derecho
-  (:require [tp2.eventos.acciones :as evt])
-  (:import (java.awt Color Dimension)
+  (:require [tp2.eventos.acciones :as evt]
+            [tp2.ui.panel-filtros :as pft])
+  (:import (java.awt Color Component Dimension)
            (java.awt.event ActionListener)
            (javax.swing BorderFactory Box BoxLayout JButton JPanel SwingUtilities)))
 ;; Configuracion de las acciones disponibles en el panel lateral derecho.
@@ -44,11 +45,20 @@
     (.setBorder panel (BorderFactory/createCompoundBorder borde-linea borde-vacio))
 
     (doseq [cfg config-top]
-      (.add panel (crear-btn cfg)))
+      (let [btn (crear-btn cfg)]
+        (.setAlignmentX btn Component/CENTER_ALIGNMENT)
+        (.add panel btn)))
+
+    (.add panel (Box/createVerticalGlue))
+    (let [panel-filtros (pft/crear estado)]
+      (.setAlignmentX panel-filtros Component/CENTER_ALIGNMENT)
+      (.add panel panel-filtros))
 
     (.add panel (Box/createVerticalGlue))
     (doseq [cfg config-bottom]
-      (.add panel (crear-btn cfg)))
+      (let [btn (crear-btn cfg)]
+        (.setAlignmentX btn Component/CENTER_ALIGNMENT)
+        (.add panel btn)))
 
     ;; Sincroniza la apariencia y estado de los botones con la seleccion de filtros
     (add-watch estado :actualizador-botones

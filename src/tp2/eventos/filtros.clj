@@ -38,12 +38,15 @@
         (vec (concat antes (rest despues))))
       pipeline)))
 
-(defn quitar-filtro [idx pipeline]
+(defmethod manejar-accion :quitar-filtro [_ idx estado]
   ; Dado un indice de filtro, devuelve un pipeline que lo haya removido.
   ; Esta funcion no revisa si se envia un indice fuera de rango; asume que es correcto.
-  (vec (concat (subvec pipeline 0 idx)
+  (let [pipeline (:pipeline @estado)]
+    (swap! estado assoc
+           :pipeline (vec (concat (subvec pipeline 0 idx)
                (subvec pipeline (inc idx)))
        ))
+    ))
 
 ;; Recalcula la imagen pasando todos los filtros aplicados
 (defn re-aplicar-filtros [imagen-original filtros-aplicados]
